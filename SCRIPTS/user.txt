@@ -1,4 +1,5 @@
-user1
-user2
-user3
-uesr4
+User1 Passw0rd!
+User2 Abc123!
+User3 Salut0!
+User4 1234567890!
+Bob AdminPassword

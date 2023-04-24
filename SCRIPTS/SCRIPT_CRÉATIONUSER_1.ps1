@@ -1,30 +1,40 @@
-# Check if user running the script is an administrator
+Param(
+    [string] $Nom,
+    [string] $Role,
+    [string] $domainName,
+    [string] $listeUsers,
+    [string] $root,
+    [string] $admin
+)
+
+# Vérifie que l'utilisateur est un Admin
 $currentUser = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 if (!$currentUser.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "You must be an administrator to run this script." -ForegroundColor Red
     Exit
 }
 
-# Define Active Directory connection parameters
+# Active Directory connection parameters
 $domainName = "ProNGF.ca"
 $ouPath = "OU=Users,DC=prongf,DC=ca"
 $adminGroupName = "Administrators"
 
-# Connect to Active Directory and get the administrators group
+# Connection au Active Directory
 $domain = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
 $root = $domain.GetDirectoryEntry()
 $administratorsGroup = [ADSI]("LDAP://CN=$adminGroupName," + $root.distinguishedName)
 
-# Create 5 users with specified names, one of them named Bob who is an administrator
-$users = @("User1", "User2", "User3", "User4", "Bob")
+# Création des users
+$users = Get-Content -Path $listeUsers | ConvertFrom-String -Delimiter " "
 foreach ($user in $users) {
-    $password = ConvertTo-SecureString -AsPlainText "Password123!" -Force
+    $password = ConvertTo-SecureString -AsPlainText $user.Password -Force
     $userParams = @{
         Name = $user
         GivenName = $user
         Surname = "LastName"
         DisplayName = $user
         SamAccountName = $user
+
         UserPrincipalName = "$user@$domainName"
         Path = "LDAP://$ouPath"
         AccountPassword = $password
@@ -32,7 +42,7 @@ foreach ($user in $users) {
         ChangePasswordAtLogon = $true
     }
     $newUser = New-LocalUser @userParams
-    if ($userName -eq "Bob") {
+    if ($userName -eq $admin) {
         $administratorsGroup.Add("LDAP://" + $newUser.distinguishedName)
     }
 }

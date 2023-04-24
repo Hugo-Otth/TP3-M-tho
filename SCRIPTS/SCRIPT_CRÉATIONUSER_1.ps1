@@ -23,6 +23,15 @@ $administratorsGroup = [ADSI]("LDAP://CN=$adminGroupName," + $root.distinguished
 
 # Création des users
 $users = Get-Content -Path $listeUsers | ConvertFrom-String -Delimiter " "
+
+$usernames = @()
+$passwords = @()
+
+foreach ($user in $users) {
+    $usernames += $user.UserName
+    $passwords += $
+}
+
 foreach ($user in $users) {
     $password = ConvertTo-SecureString -AsPlainText $user.Password -Force
     $UPN = "$user@$domainName"

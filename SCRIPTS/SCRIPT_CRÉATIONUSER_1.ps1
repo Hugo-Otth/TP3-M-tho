@@ -12,7 +12,7 @@ if (!$currentUser.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrato
 }
 
 # Active Directory connection parameters
-$domainName = "ProNGF.ca"
+$domainName = "ad.prongf.ca"
 $ouPath = "OU=Users,DC=prongf,DC=ca"
 $adminGroupName = "Administrators"
 
@@ -23,15 +23,6 @@ $administratorsGroup = [ADSI]("LDAP://CN=$adminGroupName," + $root.distinguished
 
 # Création des users
 $users = Get-Content -Path $listeUsers | ConvertFrom-String -Delimiter " "
-
-$usernames = @()
-$passwords = @()
-
-foreach ($user in $users) {
-    $usernames += $user.UserName
-    $passwords += $
-}
-
 foreach ($user in $users) {
     $password = ConvertTo-SecureString -AsPlainText $user.Password -Force
     $UPN = "$user@$domainName"

@@ -1,10 +1,7 @@
 Param(
-    [string] $Nom,
-    [string] $Role,
     [string] $domainName,
     [string] $listeUsers,
-    [string] $root,
-    [string] $admin
+    [string] $Admin
 )
 
 # Vérifie que l'utilisateur est un Admin
@@ -28,19 +25,22 @@ $administratorsGroup = [ADSI]("LDAP://CN=$adminGroupName," + $root.distinguished
 $users = Get-Content -Path $listeUsers | ConvertFrom-String -Delimiter " "
 foreach ($user in $users) {
     $password = ConvertTo-SecureString -AsPlainText $user.Password -Force
+    $UPN = "$user@$domainName"
+    if($user -eq $admin) {
+        $ = "A_$user@$domainName"
+    }
     $userParams = @{
         Name = $user
         GivenName = $user
-        Surname = "LastName"
         DisplayName = $user
         SamAccountName = $user
-
-        UserPrincipalName = "$user@$domainName"
+        UserPrincipalName = $UPN
         Path = "LDAP://$ouPath"
         AccountPassword = $password
         Enabled = $true
-        ChangePasswordAtLogon = $true
     }
+    
+    #Ajotue l'utilisateur en admin s'il est mis en parametre
     $newUser = New-LocalUser @userParams
     if ($userName -eq $admin) {
         $administratorsGroup.Add("LDAP://" + $newUser.distinguishedName)
